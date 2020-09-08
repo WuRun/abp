@@ -12,12 +12,14 @@ using Volo.Abp.Account;
 using Volo.Abp.Account.Web;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Basic;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared;
+using Volo.Abp.AspNetCore.Serilog;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.Autofac;
 using Volo.Abp.Data;
 using Volo.Abp.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore.SqlServer;
 using Volo.Abp.FeatureManagement;
+using Volo.Abp.FeatureManagement.EntityFrameworkCore;
 using Volo.Abp.Identity;
 using Volo.Abp.Identity.EntityFrameworkCore;
 using Volo.Abp.Identity.Web;
@@ -52,11 +54,14 @@ namespace MyCompanyName.MyProjectName
         typeof(AbpIdentityApplicationModule),
         typeof(AbpIdentityEntityFrameworkCoreModule),
         typeof(AbpPermissionManagementDomainIdentityModule),
+        typeof(AbpFeatureManagementWebModule),
         typeof(AbpFeatureManagementApplicationModule),
+        typeof(AbpFeatureManagementEntityFrameworkCoreModule),
         typeof(AbpTenantManagementWebModule),
         typeof(AbpTenantManagementApplicationModule),
         typeof(AbpTenantManagementEntityFrameworkCoreModule),
-        typeof(AbpAspNetCoreMvcUiBasicThemeModule)
+        typeof(AbpAspNetCoreMvcUiBasicThemeModule),
+        typeof(AbpAspNetCoreSerilogModule)
         )]
     public class MyProjectNameWebUnifiedModule : AbpModule
     {
@@ -95,8 +100,10 @@ namespace MyCompanyName.MyProjectName
                 options.Languages.Add(new LanguageInfo("cs", "cs", "Čeština"));
                 options.Languages.Add(new LanguageInfo("en", "en", "English"));
                 options.Languages.Add(new LanguageInfo("pt-BR", "pt-BR", "Português (Brasil)"));
+                options.Languages.Add(new LanguageInfo("ru", "ru", "Русский"));
                 options.Languages.Add(new LanguageInfo("tr", "tr", "Türkçe"));
-                options.Languages.Add(new LanguageInfo("zh-Hans", "zh-Hans", "Chinese"));
+                options.Languages.Add(new LanguageInfo("zh-Hans", "zh-Hans", "简体中文"));
+                options.Languages.Add(new LanguageInfo("zh-Hant", "zh-Hant", "繁體中文"));
             });
 
             Configure<AbpMultiTenancyOptions>(options =>
@@ -108,8 +115,9 @@ namespace MyCompanyName.MyProjectName
         public override void OnApplicationInitialization(ApplicationInitializationContext context)
         {
             var app = context.GetApplicationBuilder();
+            var env = context.GetEnvironment();
 
-            if (context.GetEnvironment().IsDevelopment())
+            if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
@@ -123,11 +131,14 @@ namespace MyCompanyName.MyProjectName
             app.UseVirtualFiles();
             app.UseRouting();
             app.UseAuthentication();
-            app.UseAuthorization();
+
             if (MultiTenancyConsts.IsEnabled)
             {
                 app.UseMultiTenancy();
             }
+
+            app.UseAbpRequestLocalization();
+            app.UseAuthorization();
 
             app.UseSwagger();
             app.UseSwaggerUI(options =>
@@ -135,9 +146,9 @@ namespace MyCompanyName.MyProjectName
                 options.SwaggerEndpoint("/swagger/v1/swagger.json", "Support APP API");
             });
 
-            app.UseAbpRequestLocalization();
             app.UseAuditing();
-            app.UseMvcWithDefaultRouteAndArea();
+            app.UseAbpSerilogEnrichers();
+            app.UseConfiguredEndpoints();
 
             using (var scope = context.ServiceProvider.CreateScope())
             {

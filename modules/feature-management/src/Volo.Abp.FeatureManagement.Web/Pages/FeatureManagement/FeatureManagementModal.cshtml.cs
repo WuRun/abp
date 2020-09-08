@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Volo.Abp.AspNetCore.Mvc.UI.RazorPages;
+using Volo.Abp.Features;
 using Volo.Abp.Validation.StringValues;
 
 namespace Volo.Abp.FeatureManagement.Web.Pages.FeatureManagement
@@ -25,21 +26,21 @@ namespace Volo.Abp.FeatureManagement.Web.Pages.FeatureManagement
 
         public FeatureListDto FeatureListDto { get; set; }
 
-        private readonly IFeatureAppService _featureAppService;
+        protected IFeatureAppService FeatureAppService { get; }
 
         public FeatureManagementModal(IFeatureAppService featureAppService)
         {
             ObjectMapperContext = typeof(AbpFeatureManagementWebModule);
 
-            _featureAppService = featureAppService;
+            FeatureAppService = featureAppService;
         }
 
-        public async Task OnGetAsync()
+        public virtual async Task OnGetAsync()
         {
-            FeatureListDto = await _featureAppService.GetAsync(ProviderName, ProviderKey).ConfigureAwait(false);
+            FeatureListDto = await FeatureAppService.GetAsync(ProviderName, ProviderKey);
         }
 
-        public async Task<IActionResult> OnPostAsync()
+        public virtual async Task<IActionResult> OnPostAsync()
         {
             var features = new UpdateFeaturesDto
             {
@@ -50,11 +51,15 @@ namespace Volo.Abp.FeatureManagement.Web.Pages.FeatureManagement
                 }).ToList()
             };
 
-            await _featureAppService.UpdateAsync(ProviderName, ProviderKey, features).ConfigureAwait(false);
+            await FeatureAppService.UpdateAsync(ProviderName, ProviderKey, features);
 
             return NoContent();
         }
 
+        public virtual bool IsDisabled(string providerName)
+        {
+            return providerName != ProviderName && providerName != DefaultValueFeatureValueProvider.ProviderName;
+        }
 
         public class ProviderInfoViewModel
         {
@@ -68,6 +73,8 @@ namespace Volo.Abp.FeatureManagement.Web.Pages.FeatureManagement
             public string Name { get; set; }
 
             public string Value { get; set; }
+
+            public string ProviderName { get; set; }
 
             public bool BoolValue { get; set; }
 
