@@ -34,7 +34,7 @@ dotnet tool update -g Volo.Abp.Cli
 * **`generate-proxy`**: 生成客户端代理以使用HTTP API端点.
 * **`remove-proxy`**: 移除以前生成的客户端代理.
 * **`switch-to-preview`**: 切换到ABP框架的最新预览版本。
-* **`switch-to-preview`**: 切换解决方案所有ABP相关包为[夜间构建](Nightly-Builds.md)版本.
+* **`switch-to-nightly`**: 切换解决方案所有ABP相关包为[夜间构建](Nightly-Builds.md)版本.
 * **`switch-to-stable`**: 切换解决方案所有ABP相关包为最新的稳定版本.
 * **`translate`**: 当源代码控制存储库中有多个JSON[本地化]（Localization.md文件时,可简化翻译本地化文件的过程.
 * **`login`**: 使用你在[abp.io](https://abp.io/)的用户名和密码在你的计算机上认证.
@@ -85,6 +85,8 @@ abp new Acme.BookStore
         * `--tiered`: 创建分层解决方案,Web和Http Api层在物理上是分开的.如果未指定会创建一个分层的解决方案,此解决方案没有那么复杂,适合大多数场景.
       * `angular`: Angular. 这个模板还有一些额外的选项:
         * `--separate-identity-server`: 将Identity Server应用程序与API host应用程序分开. 如果未指定,则服务器端将只有一个端点.
+      * `blazor`: Blazor. 这个模板还有一些额外的选项:
+        * `--separate-identity-server`: 将Identity Server应用程序与API host应用程序分开. 如果未指定,则服务器端将只有一个端点.
       * `none`: 无UI. 这个模板还有一些额外的选项:
         * `--separate-identity-server`: 将Identity Server应用程序与API host应用程序分开. 如果未指定,则服务器端将只有一个端点.
     * `--mobile` 或者 `-m`: 指定移动应用程序框架. 如果未指定,则不会创建任何移动应用程序,其他选项:
@@ -123,7 +125,8 @@ abp update [options]
 * `--nuget`: 仅更新的NuGet包
 * `--solution-path` 或 `-sp`: 指定解决方案路径/目录. 默认使用当前目录
 * `--solution-name` 或 `-sn`: 指定解决方案名称. 默认在目录中搜索`*.sln`文件.
-*`--check-all`: 分别检查每个包的新版本. 默认是 `false`.
+* `--check-all`: 分别检查每个包的新版本. 默认是 `false`.
+* `--version` or `-v`: 指定用于升级的版本. 如果没有指定,则使用最新版本.
 
 ### add-package
 
